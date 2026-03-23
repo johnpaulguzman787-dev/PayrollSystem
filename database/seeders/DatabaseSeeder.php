@@ -16,7 +16,7 @@ class DatabaseSeeder extends Seeder
             PagibigSeeder::class,
             PayrollItemsSettingsSeeder::class,
             PhilhealthSeeder::class,
-            SSSContributionsSeeder::class,
+            SssSeeder::class,
             TaxSeeder::class,
         ]);
     }

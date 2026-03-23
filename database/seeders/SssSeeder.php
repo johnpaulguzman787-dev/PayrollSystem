@@ -6,7 +6,7 @@ use Illuminate\Database\Console\Seeds\WithoutModelEvents;
 use Illuminate\Database\Seeder;
 use Illuminate\Support\Facades\DB;
 
-class SSSContributionsSeeder extends Seeder
+class SssSeeder extends Seeder
 {
     /**
      * Run the database seeds.
