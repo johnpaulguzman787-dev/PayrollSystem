@@ -10,8 +10,14 @@ class DatabaseSeeder extends Seeder
     /**
      * Run the database seeds.
      */
-    public function run(): void
+    public function run()
     {
-        //
+        $this->call([
+            PagibigSeeder::class,
+            PayrollItemsSettingsSeeder::class,
+            PhilhealthSeeder::class,
+            SSSContributionsSeeder::class,
+            TaxSeeder::class,
+        ]);
     }
 }
