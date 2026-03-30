@@ -43,20 +43,15 @@ public function store(Request $request)
         'basic_salary'=>'required|numeric|min:0'
     ]);
 
-    // 🔥 Generate Employee ID
     $employee_id = strtoupper(substr(str_shuffle('0123456789'), 0, 6));
 
     while(DB::table('employees')->where('employee_id', $employee_id)->exists()){
         $employee_id = strtoupper(substr(str_shuffle('0123456789'), 0, 6));
     }
 
-    // 🔥 Generate RANDOM PASSWORD (8 chars)
     $plainPassword = substr(str_shuffle('abcdefghijklmnopqrstuvwxyzABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789'), 0, 8);
-
-    // 🔥 HASH password
     $hashedPassword = Hash::make($plainPassword);
 
-    // ✅ Save to employees
     DB::table('employees')->insert([
         'employee_id'=>$employee_id,
         'fname'=>$request->fname,
@@ -75,18 +70,18 @@ public function store(Request $request)
         'updated_at'=>now()
     ]);
 
-    // ✅ Save to users table
     DB::table('users')->insert([
-        'email'=>$request->email,
-        'password'=>$hashedPassword,
+        'employee_id' => $employee_id,
+        'email' => $request->email,
+        'password' => $hashedPassword,
         'created_at'=>now(),
         'updated_at'=>now()
     ]);
 
     return redirect('/employees')
-    ->with('success', 'Employee added successfully!')
-    ->with('generated_password', $plainPassword)
-    ->with('employee_id', $employee_id);
+        ->with('success', 'Employee added successfully!')
+        ->with('generated_password', $plainPassword)
+        ->with('employee_id', $employee_id);
 }
 
     // Update employee
@@ -130,11 +125,11 @@ public function update(Request $request, $id)
 
     // ✅ Update users table (SYNC EMAIL)
     DB::table('users')
-        ->where('email', $oldEmail)
-        ->update([
-            'email' => $request->email,
-            'updated_at' => now()
-        ]);
+    ->where('employee_id', $id)
+    ->update([
+        'email' => $request->email,
+        'updated_at' => now()
+    ]); 
 
     return redirect('/employees')
         ->with('success','Employee updated successfully.');

@@ -17,6 +17,7 @@ return new class extends Migration
             $table->string('payroll_code', 16);
             $table->date('start_date');
             $table->date('end_date');
+            $table->date('payout_date')->nullable();
             $table->string('status', 20);
             $table->timestamps();
         });

@@ -36,8 +36,8 @@ return new class extends Migration
             $table->decimal('total_deductions', 12, 2)->default(0.00);
             $table->decimal('net_pay', 12, 2);
 
-            $table->enum('status', ['draft','review','approval','paid'])
-                  ->default('draft');
+            $table->enum('status', ['pending','submitted'])
+                  ->default('pending');
 
             $table->timestamps();
         });

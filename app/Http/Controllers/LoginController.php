@@ -8,28 +8,29 @@ use Illuminate\Support\Facades\Hash;
 
 class LoginController extends Controller
 {
-    // 🔹 Show login page
+    // Show login page
     public function index()
     {
         return view('login');
     }
 
-    // 🔹 Handle login
+    // Handle login
     public function login(Request $request)
     {
         $request->validate([
-            'email' => 'required|email',
-            'password' => 'required'
+            'email'=>'required|email',
+            'password'=>'required'
         ]);
 
         $user = DB::table('users')->where('email', $request->email)->first();
 
         if($user && Hash::check($request->password, $user->password)){
-            
-            // ✅ SAVE SESSION
+
+            // SAVE SESSION INCLUDING EMPLOYEE ID
             session([
                 'user_id' => $user->id,
-                'user_email' => $user->email
+                'user_email' => $user->email,
+                'employee_id' => $user->employee_id // important!
             ]);
 
             return redirect('/employees')->with('success','Login successful!');
@@ -38,7 +39,7 @@ class LoginController extends Controller
         return back()->with('error','Invalid email or password');
     }
 
-    // 🔹 Logout
+    // Logout
     public function logout()
     {
         session()->flush();

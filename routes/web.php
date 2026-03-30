@@ -5,12 +5,12 @@ use App\Http\Controllers\PayrollPeriodController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeShiftController;
 use App\Http\Controllers\ShiftController;
-use App\Http\Controllers\PayslipController;
 use App\Http\Controllers\PayslipAddController;
 use App\Http\Controllers\PayrollItemSettingsController;
 use App\Http\Controllers\AttendanceLogController;
 use App\Http\Controllers\GovernmentContributionController;
 use App\Http\Controllers\LoginController;
+use App\Http\Controllers\PayslipController;
 
 // login page
 Route::get('/login', [LoginController::class, 'index']);
@@ -27,9 +27,12 @@ Route::get('/payroll-period', [PayrollPeriodController::class, 'index']);
 Route::get('/payroll-period/view/{id}', [PayrollPeriodController::class, 'view']);
 Route::post('/payroll-period/store', [PayrollPeriodController::class, 'store']);
 Route::post('/payroll-period/update/{id}', [PayrollPeriodController::class, 'update']);
-Route::get('/payroll-period/delete/{id}', [PayrollPeriodController::class, 'delete']);
 Route::post('/payroll-period/status/{id}', [PayrollPeriodController::class, 'changeStatus']);
 Route::get('/payroll-calendar', [PayrollPeriodController::class, 'index'])->name('payroll.calendar');
+Route::get('/payroll-period/{id}/view', [PayrollPeriodController::class, 'viewPage'])->name('payroll.period.view');
+Route::get('/payroll/employee/{id}', [PayrollPeriodController::class, 'getEmployeePayroll']);
+Route::post('/payroll/employee/{id}/status', [PayrollPeriodController::class, 'updateEmployeeStatus']);
+Route::post('/payroll/period/{id}/submit', [PayrollPeriodController::class, 'submitForApproval']);
 
 /* ================= EMPLOYEE ROUTES ================= */
 
@@ -114,8 +117,7 @@ Route::post('/pagibig/update/{id}',[GovernmentContributionController::class,'upd
 Route::post('/pagibig/delete/{id}',[GovernmentContributionController::class,'deletePagibig'])->name('pagibig.delete');
 Route::post('/pagibig/toggle/{id}', [GovernmentContributionController::class,'togglePagibig'])->name('pagibig.toggle');
 
+use App\Http\Controllers\PayrollOfficerGovPay;
 
-
-
-
-
+Route::get('/payroll-officer/gov-contributions', [PayrollOfficerGovPay::class, 'index'])->name('payroll.officer.govpay');
+Route::get('/payroll-officer/gov-contributions/{id}', [PayrollOfficerGovPay::class, 'view'])->name('payroll.officer.govpay.view');
