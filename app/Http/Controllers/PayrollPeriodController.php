@@ -49,7 +49,16 @@ class PayrollPeriodController extends Controller
             ->orderByDesc('year')
             ->pluck('year');
 
-        return view('payroll_period', compact('periods', 'gross', 'net', 'deductions', 'employees', 'netTrend', 'daysToCutoff', 'years', 'currentPeriodName'));
+        $salaryGrades = DB::table('salary_grades')
+            ->select('salary_grades.*', DB::raw('(SELECT COUNT(*) FROM employees WHERE employees.salary_grade_id = salary_grades.id) as employees_count'))
+            ->get();
+
+        $allEmployees = DB::table('employees')->get();
+
+        return view('payroll_period', compact(
+            'periods', 'gross', 'net', 'deductions', 'employees', 'netTrend',
+            'daysToCutoff', 'years', 'currentPeriodName', 'salaryGrades', 'allEmployees'
+        ));
     }
 
     public function store(Request $request)
@@ -84,7 +93,6 @@ class PayrollPeriodController extends Controller
             'status' => 'pending'
         ]);
 
-        // ✅ AUTO GENERATE PAYROLL RECORDS
         $this->generatePayrollRecords($newId);
 
         return redirect('/payroll-period')->with('success', 'Payroll period created with employee records.');
@@ -131,339 +139,416 @@ class PayrollPeriodController extends Controller
     }
 
     public function changeStatus($id)
-{
-    $period = DB::table('payroll_periods')->where('id', $id)->first();
+    {
+        $period = DB::table('payroll_periods')->where('id', $id)->first();
+        if (!$period) return redirect('/payroll-period')->with('error', 'Payroll period not found.');
+        if ($period->status == 'completed') return redirect('/payroll-period')->with('error', 'Already completed.');
 
-    if (!$period) {
-        return redirect('/payroll-period')->with('error', 'Payroll period not found.');
+        DB::table('payroll_periods')->where('id', $id)->update(['status' => 'completed']);
+
+        $start = Carbon::parse($period->start_date);
+        $end = Carbon::parse($period->end_date);
+        $days = $start->diffInDays($end) + 1;
+        $nextStart = $end->copy()->addDay();
+        $nextEnd = $nextStart->copy()->addDays($days - 1);
+
+        $exists = DB::table('payroll_periods')->where('start_date', $nextStart->format('Y-m-d'))->exists();
+
+        if (!$exists) {
+            $newId = DB::table('payroll_periods')->insertGetId([
+                'name' => 'Payroll ' . $nextStart->format('M j') . ' - ' . $nextEnd->format('M j'),
+                'payroll_code' => str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT),
+                'start_date' => $nextStart,
+                'end_date' => $nextEnd,
+                'payout_date' => $nextEnd->copy()->addDays(5),
+                'status' => 'pending'
+            ]);
+            $this->generatePayrollRecords($newId);
+        }
+
+        return redirect('/payroll-period')->with('success', 'Payroll completed and next period created.');
     }
 
-    if ($period->status == 'completed') {
-        return redirect('/payroll-period')->with('error', 'Already completed.');
-    }
+    private function generatePayrollRecords($periodId)
+    {
+        $period = DB::table('payroll_periods')->where('id', $periodId)->first();
+        if (!$period) return;
+        if (DB::table('payroll_records')->where('payroll_period_id', $periodId)->exists()) return;
 
-    // ✅ Move to COMPLETED
-    DB::table('payroll_periods')->where('id', $id)->update([
-        'status' => 'completed'
-    ]);
+        $start = Carbon::parse($period->start_date);
+        $end = Carbon::parse($period->end_date);
+        $days = $start->diffInDays($end) + 1;
+        $employees = DB::table('employees')->get();
 
-    // ✅ AUTO CREATE NEXT PERIOD
-    $start = Carbon::parse($period->start_date);
-    $end = Carbon::parse($period->end_date);
-    $days = $start->diffInDays($end) + 1;
+        foreach ($employees as $employee) {
+            // Basic rates
+            $salaryGrade = DB::table('salary_grades')->where('id', $employee->salary_grade_id)->first();
+            $monthlySalary = $salaryGrade ? $salaryGrade->monthly_basic_salary : $employee->basic_salary;
+            $dailyRate = $monthlySalary / 30;
+            $hourlyRate = $dailyRate / 8;
+            $minuteRate = $hourlyRate / 60;
+            $grossPay = $dailyRate * $days;
 
-    $nextStart = $end->copy()->addDay();
-    $nextEnd = $nextStart->copy()->addDays($days - 1);
+            // Attendance logs
+            $attendanceLogs = DB::table('attendance_logs')
+                ->where('employee_id', $employee->employee_id)
+                ->whereBetween('attendance_date', [$period->start_date, $period->end_date])
+                ->get();
 
-    $exists = DB::table('payroll_periods')
-        ->where('start_date', $nextStart->format('Y-m-d'))
-        ->exists();
+            $activeSettings = DB::table('payroll_items_settings')->where('is_active', 1)->get();
+            $attendanceEarnings = 0;
+            $attendanceDeductions = 0;
+            $attendanceItems = [];
 
-    if (!$exists) {
-        $newId = DB::table('payroll_periods')->insertGetId([
-            'name' => 'Payroll ' . $nextStart->format('M j') . ' - ' . $nextEnd->format('M j'),
-            'payroll_code' => str_pad(mt_rand(1, 99999999), 8, '0', STR_PAD_LEFT),
-            'start_date' => $nextStart,
-            'end_date' => $nextEnd,
-            'payout_date' => $nextEnd->copy()->addDays(5),
-            'status' => 'pending'
-        ]);
-
-        // ✅ AUTO GENERATE AGAIN
-        $this->generatePayrollRecords($newId);
-    }
-
-    return redirect('/payroll-period')->with('success', 'Payroll completed and next period created.');
-}
-
-private function generatePayrollRecords($periodId)
-{
-    $period = DB::table('payroll_periods')->where('id', $periodId)->first();
-    if (!$period) return;
-
-    // 🚫 Prevent duplication
-    $exists = DB::table('payroll_records')
-        ->where('payroll_period_id', $periodId)
-        ->exists();
-
-    if ($exists) return;
-
-    $start = Carbon::parse($period->start_date);
-    $end = Carbon::parse($period->end_date);
-    $days = $start->diffInDays($end) + 1;
-
-    $employees = DB::table('employees')->get();
-
-    foreach ($employees as $employee) {
-
-        // ✅ BASIC RATES
-        $dailyRate = $employee->basic_salary / 30;
-        $hourlyRate = $dailyRate / 8;
-        $minuteRate = $hourlyRate / 60;
-
-        $grossPay = $dailyRate * $days;
-
-        // ✅ ATTENDANCE LOGS
-        $attendanceLogs = DB::table('attendance_logs')
-            ->where('employee_id', $employee->employee_id)
-            ->whereBetween('attendance_date', [$period->start_date, $period->end_date])
-            ->get();
-
-        $activeSettings = DB::table('payroll_items_settings')
-            ->where('is_active', 1)
-            ->get();
-
-        $attendanceEarnings = 0;
-        $attendanceDeductions = 0;
-        $attendanceItems = [];
-
-        foreach ($activeSettings as $setting) {
-            $totalUnits = 0;
-
-            foreach ($attendanceLogs as $log) {
-                switch ($setting->category) {
-                    case 'late': $totalUnits += $log->late_minutes; break;
-                    case 'undertime': $totalUnits += $log->undertime_minutes; break;
-                    case 'overtime': $totalUnits += $log->overtime_minutes; break;
-                    case 'absent': if ($log->is_absent) $totalUnits += 1; break;
-                    case 'holiday': if (isset($log->is_holiday) && $log->is_holiday) $totalUnits += 1; break;
+            foreach ($activeSettings as $setting) {
+                $totalUnits = 0;
+                foreach ($attendanceLogs as $log) {
+                    switch ($setting->category) {
+                        case 'late': $totalUnits += $log->late_minutes; break;
+                        case 'undertime': $totalUnits += $log->undertime_minutes; break;
+                        case 'overtime': $totalUnits += $log->overtime_minutes; break;
+                        case 'absent': if ($log->is_absent) $totalUnits += 1; break;
+                        case 'holiday': if (isset($log->is_holiday) && $log->is_holiday) $totalUnits += 1; break;
+                    }
                 }
+                if ($totalUnits <= 0) continue;
+
+                switch ($setting->basis) {
+                    case 'per_minute': $amount = $minuteRate * $totalUnits * $setting->multiplier; break;
+                    case 'per_hour': $amount = $hourlyRate * ($totalUnits / 60) * $setting->multiplier; break;
+                    case 'per_day': $amount = $dailyRate * $totalUnits * $setting->multiplier; break;
+                    default: $amount = 0;
+                }
+
+                if ($setting->type == 'earning') $attendanceEarnings += $amount;
+                else $attendanceDeductions += $amount;
+
+                $attendanceItems[] = ['type' => $setting->type, 'name' => $setting->name, 'amount' => $amount];
             }
 
-            if ($totalUnits <= 0) continue;
+            // Statutory deductions
+            $monthlySalary = $employee->basic_salary;
 
-            switch ($setting->basis) {
-                case 'per_minute': $amount = $minuteRate * $totalUnits * $setting->multiplier; break;
-                case 'per_hour': $amount = $hourlyRate * ($totalUnits / 60) * $setting->multiplier; break;
-                case 'per_day': $amount = $dailyRate * $totalUnits * $setting->multiplier; break;
-                default: $amount = 0;
+            // SSS
+            $sssRow = DB::table('sss_contributions')
+                ->where('salary_from', '<=', $monthlySalary)
+                ->where('salary_to', '>=', $monthlySalary)
+                ->first();
+            $monthlySSS = $sssRow ? ($sssRow->employee_share + $sssRow->employer_share) : 0;
+
+            // PhilHealth
+            $philhealthRow = DB::table('philhealth_contributions')->first();
+            $monthlyPhilHealth = 0;
+            if ($philhealthRow) {
+                $salaryPH = max($philhealthRow->min_salary, min($monthlySalary, $philhealthRow->max_salary));
+                $monthlyPhilHealth = $salaryPH * ($philhealthRow->employee_share / 100);
             }
 
-            if ($setting->type == 'earning') $attendanceEarnings += $amount;
-            else $attendanceDeductions += $amount;
+            // Pag-IBIG
+            $pagibigRow = DB::table('pagibig_contributions')->first();
+            $monthlyPagibig = 0;
+            if ($pagibigRow) {
+                $salaryCap = min($monthlySalary, $pagibigRow->salary_cap);
+                $rate = ($monthlySalary <= $pagibigRow->salary_threshold) ? $pagibigRow->employee_rate_low : $pagibigRow->employee_rate_high;
+                $monthlyPagibig = $salaryCap * ($rate / 100);
+            }
 
-            $attendanceItems[] = [
-                'type' => $setting->type,
-                'name' => $setting->name,
-                'amount' => $amount
-            ];
-        }
+            // Tax
+            $annual = $monthlySalary * 12;
+            $taxRow = DB::table('tax_contributions')
+                ->where('income_from', '<=', $annual)
+                ->where(function ($q) use ($annual) {
+                    $q->where('income_to', '>=', $annual)->orWhereNull('income_to');
+                })
+                ->first();
+            $annualTax = 0;
+            if ($taxRow && $annual > 250000) {
+                $annualTax = $taxRow->base_tax + (($annual - $taxRow->excess_over) * $taxRow->tax_rate);
+            }
+            $monthlyTax = $annualTax / 12;
 
-        // ✅ STATUTORY DEDUCTIONS
+            // Cut‑off (half month)
+            $sss = $monthlySSS / 2;
+            $philhealth = $monthlyPhilHealth /2;
+            $pagibig = $monthlyPagibig / 2;
+            $tax = $monthlyTax / 2;
+            $statutoryTotal = $sss + $philhealth + $pagibig + $tax;
 
-        $monthlySalary = $employee->basic_salary;
+            // Final computation
+            $totalEarnings = $attendanceEarnings;
+            $totalDeductions = $attendanceDeductions + $statutoryTotal;
+            $netPay = $grossPay + $totalEarnings - $totalDeductions;
 
-        // SSS
-        $sssRow = DB::table('sss_contributions')
-            ->where('salary_from', '<=', $monthlySalary)
-            ->where('salary_to', '>=', $monthlySalary)
-            ->first();
-
-        $monthlySSS = $sssRow ? ($sssRow->employee_share + $sssRow->employer_share) : 0;
-
-        // PhilHealth
-        $philhealthRow = DB::table('philhealth_contributions')->first();
-        $monthlyPhilHealth = 0;
-
-        if ($philhealthRow) {
-            $salaryPH = max($philhealthRow->min_salary, min($monthlySalary, $philhealthRow->max_salary));
-            $monthlyPhilHealth = $salaryPH * ($philhealthRow->contribution_rate / 100) / 2;
-        }
-
-        // Pag-IBIG
-        $pagibigRow = DB::table('pagibig_contributions')->first();
-        $monthlyPagibig = 0;
-
-        if ($pagibigRow) {
-            $salaryCap = min($monthlySalary, $pagibigRow->salary_cap);
-            $rate = ($monthlySalary <= $pagibigRow->salary_threshold)
-                ? $pagibigRow->employee_rate_low
-                : $pagibigRow->employee_rate_high;
-
-            $monthlyPagibig = $salaryCap * ($rate / 100);
-        }
-
-        // TAX
-        $annual = $monthlySalary * 12;
-
-        $taxRow = DB::table('tax_contributions')
-            ->where('income_from', '<=', $annual)
-            ->where(function ($q) use ($annual) {
-                $q->where('income_to', '>=', $annual)
-                  ->orWhereNull('income_to');
-            })
-            ->first();
-
-        $annualTax = 0;
-
-        if ($taxRow && $annual > 250000) {
-            $annualTax = $taxRow->base_tax + (($annual - $taxRow->excess_over) * $taxRow->tax_rate);
-        }
-
-        $monthlyTax = $annualTax / 12;
-
-        // 👉 CUT-OFF (HALF MONTH)
-        $sss = $monthlySSS / 2;
-        $philhealth = $monthlyPhilHealth;
-        $pagibig = $monthlyPagibig / 2;
-        $tax = $monthlyTax / 2;
-
-        $statutoryTotal = $sss + $philhealth + $pagibig + $tax;
-
-        // ✅ FINAL COMPUTATION
-        $totalEarnings = $attendanceEarnings;
-        $totalDeductions = $attendanceDeductions + $statutoryTotal;
-        $netPay = $grossPay + $totalEarnings - $totalDeductions;
-
-        // ✅ SAVE RECORD
-        $payrollRecordId = DB::table('payroll_records')->insertGetId([
-            'payroll_period_id' => $periodId,
-            'employee_id' => $employee->employee_id,
-            'basic_salary' => $employee->basic_salary,
-            'gross_pay' => $grossPay,
-            'total_earnings' => $totalEarnings,
-            'total_deductions' => $totalDeductions,
-            'net_pay' => $netPay,
-            'status' => 'pending',
-            'created_at' => now(),
-            'updated_at' => now()
-        ]);
-
-        // ✅ SAVE ITEMS (attendance)
-        foreach ($attendanceItems as $item) {
-            DB::table('payroll_items')->insert([
-                'payroll_record_id' => $payrollRecordId,
-                'type' => $item['type'],
-                'name' => $item['name'],
-                'amount' => $item['amount'],
+            // Save record
+            $payrollRecordId = DB::table('payroll_records')->insertGetId([
+                'payroll_period_id' => $periodId,
+                'employee_id' => $employee->employee_id,
+                'basic_salary' => $employee->basic_salary,
+                'gross_pay' => $grossPay,
+                'total_earnings' => $totalEarnings,
+                'total_deductions' => $totalDeductions,
+                'net_pay' => $netPay,
+                'status' => 'pending',
                 'created_at' => now(),
                 'updated_at' => now()
             ]);
-        }
 
-        // ✅ SAVE STATUTORY ITEMS
-        $statutoryItems = [
-            ['name' => 'SSS', 'amount' => $sss],
-            ['name' => 'PhilHealth', 'amount' => $philhealth],
-            ['name' => 'Pag-IBIG', 'amount' => $pagibig],
-            ['name' => 'Withholding Tax', 'amount' => $tax],
-        ];
-
-        foreach ($statutoryItems as $item) {
-            if ($item['amount'] > 0) {
+            // Attendance items
+            foreach ($attendanceItems as $item) {
                 DB::table('payroll_items')->insert([
                     'payroll_record_id' => $payrollRecordId,
-                    'type' => 'deduction',
+                    'type' => $item['type'],
                     'name' => $item['name'],
                     'amount' => $item['amount'],
                     'created_at' => now(),
                     'updated_at' => now()
                 ]);
             }
+
+            // Statutory items
+            $statutoryItems = [
+                ['name' => 'SSS', 'amount' => $sss],
+                ['name' => 'PhilHealth', 'amount' => $philhealth],
+                ['name' => 'Pag-IBIG', 'amount' => $pagibig],
+                ['name' => 'Withholding Tax', 'amount' => $tax],
+            ];
+            foreach ($statutoryItems as $item) {
+                if ($item['amount'] > 0) {
+                    DB::table('payroll_items')->insert([
+                        'payroll_record_id' => $payrollRecordId,
+                        'type' => 'deduction',
+                        'name' => $item['name'],
+                        'amount' => $item['amount'],
+                        'created_at' => now(),
+                        'updated_at' => now()
+                    ]);
+                }
+            }
         }
     }
-}
 
-   public function viewPage($id)
+    public function viewPage($id)
     {
         $period = DB::table('payroll_periods')->where('id', $id)->first();
-
-        if (!$period) {
-            return redirect('/payroll-period')->with('error', 'Payroll period not found.');
-        }
+        if (!$period) return redirect('/payroll-period')->with('error', 'Payroll period not found.');
 
         $records = DB::table('payroll_records')
             ->join('employees', 'payroll_records.employee_id', '=', 'employees.employee_id')
-            ->select(
-                'payroll_records.*',
-                'employees.fname',
-                'employees.lname'
-            )
+            ->select('payroll_records.*', 'employees.fname', 'employees.lname')
             ->where('payroll_period_id', $id)
             ->get();
 
-        $gross = $records->sum('gross_pay');
-        $deductions = $records->sum('total_deductions');
-        $net = $records->sum('net_pay');
-
-        $totalEmployees = $records->count();
+        $gross = $records->where('status', 'submitted')->sum('gross_pay');
+        $deductions = $records->where('status', 'submitted')->sum('total_deductions');
+        $net = $records->where('status', 'submitted')->sum('net_pay');
+        $totalCount = $records->count();
         $submittedCount = $records->where('status', 'submitted')->count();
-
-        // percentage
-        $submittedPercent = $totalEmployees > 0 
-            ? ($submittedCount / $totalEmployees) * 100 
-            : 0;
-
-        // payroll approval progress
-        $approvalPercent = ($period->status == 'for_approval' || $period->status == 'approved' || $period->status == 'completed') ? 100 : 0;
+        $approvalCount = in_array($period->status, ['for_approval', 'approved', 'completed']) ? 1 : 0;
+        $financeCount = in_array($period->status, ['approved', 'completed']) ? 1 : 0;
+        $disbursementCount = $period->status == 'completed' ? 1 : 0;
 
         return view('payroll_period_views', compact(
-            'period',
-            'records',
-            'gross',
-            'deductions',
-            'net',
-            'submittedPercent',
-            'approvalPercent'
+            'period', 'records', 'gross', 'deductions', 'net',
+            'totalCount', 'submittedCount', 'approvalCount', 'financeCount', 'disbursementCount'
         ));
     }
 
     public function getEmployeePayroll($id)
-{
-    $record = DB::table('payroll_records')
-        ->join('employees', 'payroll_records.employee_id', '=', 'employees.employee_id')
-        ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
-        ->leftJoin('job_titles', 'employees.job_title_id', '=', 'job_titles.id')
-        ->where('payroll_records.id', $id)
-        ->select(
-            'payroll_records.*',
-            'employees.fname',
-            'employees.lname',
-            'departments.name as department_name',
-            'job_titles.title as job_title'
-        )
-    ->first();
+    {
+        $record = DB::table('payroll_records')
+            ->join('employees', 'payroll_records.employee_id', '=', 'employees.employee_id')
+            ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+            ->leftJoin('job_titles', 'employees.job_title_id', '=', 'job_titles.id')
+            ->where('payroll_records.id', $id)
+            ->select('payroll_records.*', 'employees.fname', 'employees.lname', 'departments.name as department_name', 'job_titles.title as job_title')
+            ->first();
 
-    $items = DB::table('payroll_items')
-        ->where('payroll_record_id', $id)
-        ->get();
+        $items = DB::table('payroll_items')->where('payroll_record_id', $id)->get();
 
-    return response()->json([
-        'record' => $record,
-        'items' => $items
-    ]);
-}
-
-public function updateEmployeeStatus(Request $request, $id)
-{
-    $record = DB::table('payroll_records')->where('id', $id)->first();
-
-    if ($record->status == 'pending') {
-        $newStatus = 'submitted';
-    } else {
-        return response()->json(['error' => 'Already submitted']);
+        return response()->json(['record' => $record, 'items' => $items]);
     }
 
-    DB::table('payroll_records')->where('id', $id)->update([
-        'status' => $newStatus
-    ]);
+    public function updateEmployeeStatus(Request $request, $id)
+    {
+        $record = DB::table('payroll_records')->where('id', $id)->first();
+        if ($record->status == 'pending') {
+            $newStatus = 'submitted';
+        } else {
+            return response()->json(['error' => 'Already submitted']);
+        }
 
-    return response()->json(['success' => true, 'status' => $newStatus]);
-}
+        DB::table('payroll_records')->where('id', $id)->update(['status' => $newStatus]);
 
-public function submitForApproval($id)
-{
-    $period = DB::table('payroll_periods')->where('id', $id)->first();
-
-    if (!$period) {
-        return response()->json(['error' => 'Not found']);
+        return response()->json(['success' => true, 'status' => $newStatus]);
     }
 
-    DB::table('payroll_periods')
-        ->where('id', $id)
-        ->update(['status' => 'for_approval']);
+    public function submitForApproval($id)
+    {
+        $period = DB::table('payroll_periods')->where('id', $id)->first();
+        if (!$period) return response()->json(['error' => 'Not found']);
 
-    return response()->json(['success' => true]);
+        DB::table('payroll_periods')->where('id', $id)->update(['status' => 'for_approval']);
+
+        return response()->json(['success' => true]);
+    }
+
+    public function storeSalaryGrade(Request $request)
+{
+    $request->validate([
+        'grade_code' => 'required|unique:salary_grades,grade_code',
+        'level_name' => 'required',
+        'monthly_basic_salary' => 'required|numeric'
+    ]);
+
+    $id = DB::table('salary_grades')->insertGetId([
+        'grade_code' => $request->grade_code,
+        'level_name' => $request->level_name,
+        'monthly_basic_salary' => $request->monthly_basic_salary,
+        'created_at' => now(),
+        'updated_at' => now()
+    ]);
+
+    $employees = json_decode($request->employees, true);
+
+if ($employees) {
+    foreach ($employees as $empId) {
+        DB::table('employees')
+            ->where('employee_id', $empId)
+            ->update(['salary_grade_id' => $id]);
+    }
 }
 
+    return back()->with('success', 'Salary grade added!');
+}
+
+public function updateSalaryGrade(Request $request, $id)
+{
+    $request->validate([
+        'grade_code' => 'required|unique:salary_grades,grade_code,' . $id,
+        'level_name' => 'required',
+        'monthly_basic_salary' => 'required|numeric'
+    ]);
+
+    DB::table('salary_grades')->where('id', $id)->update([
+        'grade_code' => $request->grade_code,
+        'level_name' => $request->level_name,
+        'monthly_basic_salary' => $request->monthly_basic_salary,
+        'updated_at' => now()
+    ]);
+
+    if ($request->employees) {
+        $data = json_decode($request->employees, true);
+
+        // ADD / KEEP
+        $employees = json_decode($request->employees, true);
+
+if ($employees) {
+    foreach ($employees as $empId) {
+        DB::table('employees')
+            ->where('employee_id', $empId)
+            ->update(['salary_grade_id' => $id]);
+    }
+}
+
+        // REMOVE
+        $employees = json_decode($request->employees, true);
+
+// REMOVE all current assignments first
+DB::table('employees')
+    ->where('salary_grade_id', $id)
+    ->update(['salary_grade_id' => null]);
+
+// RE-ASSIGN selected
+if ($employees) {
+    foreach ($employees as $empId) {
+        DB::table('employees')
+            ->where('employee_id', $empId)
+            ->update(['salary_grade_id' => $id]);
+    }
+}
+    }
+
+    return back()->with('success', 'Salary grade updated!');
+}
+
+    public function deleteSalaryGrade($id)
+    {
+        DB::table('salary_grades')->where('id', $id)->delete();
+        return redirect()->back()->with('success', 'Salary grade deleted!');
+    }
+
+
+    public function updatepagibig(Request $request)
+{
+    DB::table('pagibig_contributions')->update([
+        'salary_cap' => $request->salary_cap,
+        'employee_rate_low' => $request->employee_rate_low,
+        'employee_rate_high' => $request->employee_rate_high,
+        'salary_threshold' => $request->salary_threshold,
+        'updated_at' => now()
+    ]);
+
+    return back()->with('success', 'Pag-IBIG updated!');
+}
+
+public function updatePhilHealth(Request $request)
+{
+    $request->validate([
+        'min_salary' => 'required|numeric',
+        'max_salary' => 'required|numeric',
+        'contribution_rate' => 'required|numeric',
+        'employee_share' => 'required|numeric',
+        'employer_share' => 'required|numeric',
+    ]);
+
+    DB::table('philhealth_contributions')->update([
+        'min_salary' => $request->min_salary,
+        'max_salary' => $request->max_salary,
+        'contribution_rate' => $request->contribution_rate,
+        'employee_share' => $request->employee_share,
+        'employer_share' => $request->employer_share,
+        'updated_at' => now()
+    ]);
+
+    return back()->with('success', 'PhilHealth settings updated!');
+}
+ 
+public function updateTax(Request $request)
+{
+    $ids = $request->id;
+
+    // Clear existing
+    DB::table('tax_contributions')->truncate();
+
+    // Re-insert all rows
+    for ($i = 0; $i < count($request->income_from); $i++) {
+        DB::table('tax_contributions')->insert([
+            'income_from' => $request->income_from[$i],
+            'income_to' => $request->income_to[$i] ?: null,
+            'base_tax' => $request->base_tax[$i],
+            'tax_rate' => $request->tax_rate[$i],
+            'excess_over' => $request->excess_over[$i],
+        ]);
+    }
+
+    return back()->with('success', 'Tax table updated!');
+}
+
+public function updateSSS(Request $request)
+{
+    foreach ($request->id as $index => $id) {
+        DB::table('sss_contributions')->updateOrInsert(
+            ['id' => $id],
+            [
+                'salary_from' => $request->salary_from[$index],
+                'salary_to' => $request->salary_to[$index],
+                'monthly_salary_credit' => $request->monthly_salary_credit[$index],
+                'employee_share' => $request->employee_share[$index],
+                'employer_share' => $request->employer_share[$index]
+            ]
+        );
+    }
+
+    return back()->with('success', 'SSS updated!');
+}
 }

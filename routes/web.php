@@ -1,6 +1,7 @@
 <?php
 
 use Illuminate\Support\Facades\Route;
+use Illuminate\Support\Facades\DB;
 use App\Http\Controllers\PayrollPeriodController;
 use App\Http\Controllers\EmployeeController;
 use App\Http\Controllers\EmployeeShiftController;
@@ -33,6 +34,21 @@ Route::get('/payroll-period/{id}/view', [PayrollPeriodController::class, 'viewPa
 Route::get('/payroll/employee/{id}', [PayrollPeriodController::class, 'getEmployeePayroll']);
 Route::post('/payroll/employee/{id}/status', [PayrollPeriodController::class, 'updateEmployeeStatus']);
 Route::post('/payroll/period/{id}/submit', [PayrollPeriodController::class, 'submitForApproval']);
+
+// SALARY STRUCTURE
+Route::post('/salary-grade/store', [PayrollPeriodController::class, 'storeSalaryGrade']);
+Route::delete('/salary-grade/delete/{id}', [PayrollPeriodController::class, 'deleteSalaryGrade']);
+Route::get('/salary-grade/{id}/employees', function ($id) {return DB::table('employees')->where('salary_grade_id', $id)->pluck('id');});
+Route::post('/salary-grade/update/{id}', [PayrollPeriodController::class, 'updateSalaryGrade']);
+Route::delete('/salary-grade/delete/{id}', [PayrollPeriodController::class, 'deleteSalaryGrade']);
+
+//CONTRIBUTIONS
+Route::post('/philhealth/update', [PayrollPeriodController::class, 'updatePhilHealth']);
+Route::post('/pagibig/update', [PayrollPeriodController::class, 'updatepagibig']);
+Route::post('/tax/update', [PayrollPeriodController::class, 'updateTax']);
+Route::post('/sss/update', [PayrollPeriodController::class, 'updateSSS']);
+
+
 
 /* ================= EMPLOYEE ROUTES ================= */
 
@@ -120,4 +136,3 @@ Route::post('/pagibig/toggle/{id}', [GovernmentContributionController::class,'to
 use App\Http\Controllers\PayrollOfficerGovPay;
 
 Route::get('/payroll-officer/gov-contributions', [PayrollOfficerGovPay::class, 'index'])->name('payroll.officer.govpay');
-Route::get('/payroll-officer/gov-contributions/{id}', [PayrollOfficerGovPay::class, 'view'])->name('payroll.officer.govpay.view');
