@@ -113,6 +113,8 @@ tr:hover { background: #fafcff; cursor: pointer; }
 
 </div>
 
+
+
 <script>
 function peso(val){
     return '₱ ' + parseFloat(val).toLocaleString(undefined, { minimumFractionDigits: 2, maximumFractionDigits: 2 });
@@ -125,13 +127,23 @@ function loadEmployee(row) {
     .then(data => {
         let earnings = '';
         let deductions = '';
+        let benefits = '';
         data.items.forEach(item => {
-            if(item.type === 'earning'){
+            if(item.type === 'Addition'){
                 earnings += `<div class="row-flex"><span>${item.name}</span><span class="peso-box">${peso(item.amount)}</span></div>`;
             } else {
                 deductions += `<div class="row-flex"><span>${item.name}</span><span class="peso-box negative">- ${peso(item.amount)}</span></div>`;
             }
         });
+        // BENEFITS LOOP
+if(data.benefits){
+    data.benefits.forEach(b => {
+        benefits += `<div class="row-flex">
+            <span>${b.name}</span>
+            <span class="peso-box">${peso(b.amount)}</span>
+        </div>`;
+    });
+}
         document.getElementById('employeePanel').innerHTML = `
         <div class="payslip-card">
             <div class="payslip-header"><h3>Medisource</h3><small>{{ $period->name }}</small></div>
@@ -139,10 +151,12 @@ function loadEmployee(row) {
                 <div class="row-flex"><div><strong>${data.record.fname} ${data.record.lname}</strong><br><small>${data.record.job_title ?? 'No Title'}</small></div><div><small>Department</small><br>${data.record.department_name ?? 'N/A'}</div></div>
                 <div class="divider"></div>
                 <div class="section-title">Earnings</div>
-                <div class="row-flex"><span>Basic Pay</span><span>${peso(data.record.basic_salary)}</span></div>
+                <div class="row-flex"><span>Basic Pay</span><span>${peso(data.record.basic_pay)}</span></div>
                 ${earnings}
                 <div class="row-flex"><strong>Gross Pay</strong><strong>${peso(data.record.gross_pay)}</strong></div>
                 <div class="section-title">Deductions</div>
+                <div class="section-title">Benefits</div>
+                ${benefits}
                 ${deductions}
                 <div class="row-flex"><strong>Total Deductions</strong><strong>${peso(data.record.total_deductions)}</strong></div>
                 <div class="section-title">Calculation</div>
@@ -150,8 +164,23 @@ function loadEmployee(row) {
                 <div class="row-flex"><span>Deductions</span><span>${peso(data.record.total_deductions)}</span></div>
                 <div class="row-flex"><strong>Net Pay</strong><strong>${peso(data.record.net_pay)}</strong></div>
                 <div class="panel-actions">
-                    <button class="btn-outline">Edit</button>
-                    <button class="btn-submit" onclick="updateStatus(${data.record.id})">${data.record.status === 'submitted' ? 'Submitted' : 'Submit'}</button>
+                    ${
+                        data.record.status === 'submitted'
+                        ? `<button class="btn-outline" disabled style="opacity:.5; cursor:not-allowed;">Edit Locked</button>`
+                        : `<button class="btn-outline" onclick="openEditModal(${data.record.id})">Edit</button>`
+                    }
+
+                    ${
+                        data.record.status === 'submitted'
+                        ? `<button class="btn-submit" disabled style="opacity:.6;">Submitted</button>`
+                        : `<button class="btn-submit" onclick="updateStatus(${data.record.id})">Submit</button>`
+                    }
+
+                    ${
+                        data.record.status === 'submitted'
+                        ? `<button class="btn-primary" onclick="exportPayslip(${data.record.id})">Export Payslip</button>`
+                        : ``
+                    }
                 </div>
             </div>
         </div>`;
@@ -183,7 +212,44 @@ function submitForApproval(id){
 
 document.querySelectorAll('.progress-bar').forEach(bar => { bar.style.width = bar.getAttribute('data-width') + '%'; });
 document.getElementById('submitBtn').addEventListener('click', function() { submitForApproval(this.getAttribute('data-id')); });
-</script>
 
+function exportPayslip(id){
+    window.open(`/payroll/payslip/${id}/export`, '_blank');
+}
+
+function openEditModal(id){
+    document.getElementById('editPayslipModal').style.display = 'flex';
+    document.getElementById('edit_id').value = id;
+}
+
+function closeEditModal(){
+    document.getElementById('editPayslipModal').style.display = 'none';
+}
+
+function savePayslipEdit(){
+    let id = document.getElementById('edit_id').value;
+
+    fetch(`/payroll/employee/${id}/edit`, {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+            'X-CSRF-TOKEN': document.querySelector('meta[name="csrf-token"]').content
+        },
+        body: JSON.stringify({
+            earnings: document.getElementById('edit_earnings').value,
+            deductions: document.getElementById('edit_deductions').value,
+            benefits: document.getElementById('edit_benefits').value
+        })
+    })
+    .then(res => res.json())
+    .then(res => {
+        if(res.success){
+            alert("Updated!");
+            closeEditModal();
+            location.reload();
+        }
+    });
+}
+</script>
 </body>
 </html>

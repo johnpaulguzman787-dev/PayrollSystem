@@ -34,6 +34,8 @@ Route::get('/payroll-period/{id}/view', [PayrollPeriodController::class, 'viewPa
 Route::get('/payroll/employee/{id}', [PayrollPeriodController::class, 'getEmployeePayroll']);
 Route::post('/payroll/employee/{id}/status', [PayrollPeriodController::class, 'updateEmployeeStatus']);
 Route::post('/payroll/period/{id}/submit', [PayrollPeriodController::class, 'submitForApproval']);
+Route::get('/payroll/payslip/{id}/export', [PayrollPeriodController::class, 'exportPayslip']);
+Route::post('/payroll/employee/{id}/edit', [PayrollPeriodController::class, 'editEmployeePayslip']);
 
 // SALARY STRUCTURE
 Route::post('/salary-grade/store', [PayrollPeriodController::class, 'storeSalaryGrade']);
@@ -42,11 +44,18 @@ Route::get('/salary-grade/{id}/employees', function ($id) {return DB::table('emp
 Route::post('/salary-grade/update/{id}', [PayrollPeriodController::class, 'updateSalaryGrade']);
 Route::delete('/salary-grade/delete/{id}', [PayrollPeriodController::class, 'deleteSalaryGrade']);
 
+//PAYROLL ITEMS
+Route::post('/payroll-item/store', [PayrollPeriodController::class, 'storePayrollItem']);
+Route::delete('/payroll-item/delete/{id}', [PayrollPeriodController::class, 'deletePayrollItem']);
 //CONTRIBUTIONS
 Route::post('/philhealth/update', [PayrollPeriodController::class, 'updatePhilHealth']);
 Route::post('/pagibig/update', [PayrollPeriodController::class, 'updatepagibig']);
 Route::post('/tax/update', [PayrollPeriodController::class, 'updateTax']);
 Route::post('/sss/update', [PayrollPeriodController::class, 'updateSSS']);
+
+// BENEFITS
+Route::post('/benefits/store', [PayrollPeriodController::class, 'storeBenefit']);
+Route::delete('/benefits/delete/{id}', [PayrollPeriodController::class, 'deleteBenefit']);
 
 
 

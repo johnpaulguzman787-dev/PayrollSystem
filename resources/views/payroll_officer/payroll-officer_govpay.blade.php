@@ -30,7 +30,7 @@
         .status-badge { display: inline-block; padding: 0.3rem 0.9rem; border-radius: 4px; font-size: 0.75rem; font-weight: 600; text-transform: capitalize; letter-spacing: 0.3px; }
         .status-submitted { background: #CCF7E0; color: #2D2D2D; }
         .status-pending { background: #fff3cd; color: #856404; }
-        .btn { border-radius: 4px; border: none; font-weight: 500; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; padding: 6px 16px; background: transparent; }
+        .btn { border-radius: 4px; border: none; font-weight: 5 fde00; font-size: 0.8rem; cursor: pointer; transition: all 0.2s ease; display: inline-flex; align-items: center; justify-content: center; gap: 6px; font-family: inherit; padding: 6px 16px; background: transparent; }
         .btn-info { background: #C8DCFE; color: #3B7DED; border: 2px solid #3B7DED; border-radius: 4px; font-weight: 500; font-size: 0.8rem; text-decoration: none; }
         .btn-info:hover { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
         .row-controls { display: flex; flex-wrap: wrap; align-items: center; justify-content: space-between; gap: 1.3rem; margin-bottom: 1.5rem; }

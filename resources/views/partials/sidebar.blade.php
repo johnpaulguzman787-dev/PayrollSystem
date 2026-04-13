@@ -147,30 +147,6 @@
     <h2>HRIS</h2>
     <ul>
         <li>
-            <a href="{{ url('/attendance-logs') }}" class="{{ request()->is('attendance-logs*') ? 'active' : '' }}">
-                <i class="fas fa-clock"></i>
-                <span>Attendance</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url('/employees') }}" class="{{ request()->is('employees*') ? 'active' : '' }}">
-                <i class="fas fa-users"></i>
-                <span>Employees</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url('/employee-shifts') }}" class="{{ request()->is('employee-shifts*') ? 'active' : '' }}">
-                <i class="fas fa-calendar-alt"></i>
-                <span>Employee Shifts</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url('/shifts') }}" class="{{ request()->is('shifts*') ? 'active' : '' }}">
-                <i class="fas fa-exchange-alt"></i>
-                <span>Shifts</span>
-            </a>
-        </li>
-        <li>
             <a href="{{ url('/payroll-period') }}" class="{{ request()->is('payroll_period*') ? 'active' : '' }}">
                 <i class="fas fa-file-invoice-dollar"></i>
                 <span>Payroll Period</span>
@@ -180,18 +156,6 @@
             <a href="{{ url('/payslip') }}" class="{{ request()->is('payslip*') ? 'active' : '' }}">
                 <i class="fas fa-receipt"></i>
                 <span>Payslips</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url('/payroll-items-settings') }}" class="{{ request()->is('payroll-items-settings*') ? 'active' : '' }}">
-                <i class="fas fa-sliders-h"></i>
-                <span>Payroll Items</span>
-            </a>
-        </li>
-        <li>
-            <a href="{{ url('/government-contributions') }}" class="{{ request()->is('government-contributions*') ? 'active' : '' }}">
-                <i class="fas fa-landmark"></i>
-                <span>Government Items</span>
             </a>
         </li>
         <li>

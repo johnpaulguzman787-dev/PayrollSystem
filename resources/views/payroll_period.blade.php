@@ -22,54 +22,19 @@
         .tax-scroll::-webkit-scrollbar-thumb { background: #ccc; border-radius: 10px; }
         .sss-row { padding: 6px 0; border-bottom: 1px solid #eef2f9; }
         .sss-line { display: flex; justify-content: space-between; font-size: 11px; font-weight: 600; }
-        .sss-sub { font-size: 13px;  margin-left: 15px; }
-        .tax-row {
-    padding: 6px 0;
-    border-bottom: 1px solid #eef2f9;
-}
-.tax-line {
-    display: flex;
-    justify-content: space-between;
-    font-size: 12px;
-    font-weight: 600;
-}
-.tax-sub {
-    font-size: 11px;
-    margin-left: 15px;
-}
+        .sss-sub { font-size: 13px; margin-left: 15px; }
+        .tax-row { padding: 6px 0; border-bottom: 1px solid #eef2f9; }
+        .tax-line { display: flex; justify-content: space-between; font-size: 12px; font-weight: 600; }
+        .tax-sub { font-size: 11px; margin-left: 15px; }
         .period-name { font-size: 0.7rem; color: #8ca3bc; text-align: right; margin-top: auto; padding-top: 0.5rem; border-top: 1px dashed #eef2f9; }
         .table-section { border: 1px solid #e2e8f0; border-radius: 8px; background: #ffffff; padding: 1.5rem 0 0 0; box-shadow: 0 1px 3px rgba(0, 0, 0, 0.03); }
         .row-controls { display: flex; flex-wrap: wrap; align-items: center; gap: 1.3rem; margin-bottom: 1.5rem; padding: 0 1.5rem; }
         .col-search { flex: 2; min-width: 250px; }
-        /* Grid layout for form rows inside SSS and Tax modals */
-        .form-row-grid {
-            display: grid;
-            grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
-            gap: 1rem;
-            margin-bottom: 1.5rem;
-            padding-bottom: 1rem;
-            border-bottom: 1px solid #eef2f9;
-        }
-        .form-row-grid:last-child {
-            border-bottom: none;
-            margin-bottom: 0;
-            padding-bottom: 0;
-        }
-        .form-row-grid .form-group {
-            margin-bottom: 0;
-        }
-        .form-row-grid .form-group label {
-            font-size: 0.8rem;
-            font-weight: 600;
-            margin-bottom: 0.4rem;
-            display: block;
-        }
-        @media (max-width: 640px) {
-            .form-row-grid {
-                grid-template-columns: 1fr;
-                gap: 0.75rem;
-            }
-        }
+        .form-row-grid { display: grid; grid-template-columns: repeat(auto-fit, minmax(160px, 1fr)); gap: 1rem; margin-bottom: 1.5rem; padding-bottom: 1rem; border-bottom: 1px solid #eef2f9; }
+        .form-row-grid:last-child { border-bottom: none; margin-bottom: 0; padding-bottom: 0; }
+        .form-row-grid .form-group { margin-bottom: 0; }
+        .form-row-grid .form-group label { font-size: 0.8rem; font-weight: 600; margin-bottom: 0.4rem; display: block; }
+        @media (max-width: 640px) { .form-row-grid { grid-template-columns: 1fr; gap: 0.75rem; } }
         .col-filter { min-width: 150px; }
         .col-button { margin-left: auto; }
         .search-box { position: relative; }
@@ -84,11 +49,11 @@
         .btn-add { background: #2c7be5; color: white; box-shadow: 0 2px 6px rgba(44, 123, 229, 0.25); height: 3rem; width: 15rem; padding: 0 1rem; }
         .btn-add i { color: white; }
         .btn-add:hover { background: #1f62c9; transform: translateY(-1px); box-shadow: 0 8px 18px rgba(44, 123, 229, 0.3); }
-        .btn-edit { background: #ffb74d; color: #2c2c2c; padding: 0.6rem 1.2rem; }
-        .btn-edit:hover { background: #ffa726; transform: translateY(-1px); }
-        .btn-status { background: #26a69a; color: white; padding: 0.6rem 1.2rem; }
-        .btn-status:hover { background: #1e8f84; transform: translateY(-1px); }
-        .btn-info { background: #C8DCFE; color: #3B7DED; border: 2px solid #3B7DED; border-radius: 4px; padding: 6px 16px; font-weight: 500; font-size: 14px; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25); transition: all 0.2s ease; }
+        .btn-edit { background: #C8DCFE; color: #3B7DED; border: 2px solid #3B7DED; border-radius: 4px; padding: 6px 16px; font-weight: 500; font-size: 14px; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25); transition: all 0.2s ease; }
+        .btn-edit:hover { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
+        .btn-status { background: #FFCBC6; color: #FB4D3F; border: 2px solid #FB4D3F; border-radius: 4px; padding: 6px 16px; font-weight: 500; font-size: 14px; box-shadow: 0 2px 6px rgba(246, 59, 59, 0.25); transition: all 0.2s ease; }
+        .btn-status:hover { background: #ff675c; color: #fff; box-shadow: 0 4px 12px rgba(246, 59, 59, 0.4); }
+        .btn-info { background: #C8DCFE; color: #3B7DED; padding: 6px 16px; font-weight: 500; font-size: 14px; box-shadow: 0 2px 6px rgba(59, 130, 246, 0.25); transition: all 0.2s ease; }
         .btn-info:hover { background: #3b82f6; color: #fff; box-shadow: 0 4px 12px rgba(59, 130, 246, 0.4); }
         .table-responsive { overflow-x: auto; }
         table { width: 100%; border-collapse: collapse; font-size: 0.9rem; background: #ffffff; overflow: hidden; }
@@ -110,27 +75,11 @@
         #viewModal .close { position: absolute; right: 1.5rem; top: 1.2rem; font-size: 1.6rem; cursor: pointer; color: #8f9eb2; transition: 0.2s; }
         #viewModal .close:hover { color: #2c3e50; }
         #viewContent table th, #viewContent table td { border: 1px solid #e9edf2; padding: 0.5rem; }
-        .modal-content { background: #ffffff; border-radius: 16px; width: 90%; max-width: 520px; padding: 1.8rem 2rem 2rem; position: relative; animation: fadeSlideUp 0.25s ease; box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.3); }
-        /* Make modals scrollable when content overflows */
-        .modal-content {
-            max-height: 85vh;
-            overflow-y: auto;
-        }
-        /* Optional: better scrollbar styling inside modals */
-        .modal-content::-webkit-scrollbar {
-            width: 6px;
-        }
-        .modal-content::-webkit-scrollbar-track {
-            background: #f1f1f1;
-            border-radius: 10px;
-        }
-        .modal-content::-webkit-scrollbar-thumb {
-            background: #c1c1c1;
-            border-radius: 10px;
-        }
-        .modal-content::-webkit-scrollbar-thumb:hover {
-            background: #a8a8a8;
-        }
+        .modal-content { background: #ffffff; border-radius: 16px; width: 90%; max-width: 520px; padding: 1.8rem 2rem 2rem; position: relative; animation: fadeSlideUp 0.25s ease; box-shadow: 0 25px 40px -12px rgba(0, 0, 0, 0.3); max-height: 85vh; overflow-y: auto; }
+        .modal-content::-webkit-scrollbar { width: 6px; }
+        .modal-content::-webkit-scrollbar-track { background: #f1f1f1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb { background: #c1c1c1; border-radius: 10px; }
+        .modal-content::-webkit-scrollbar-thumb:hover { background: #a8a8a8; }
         .modal-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 1.5rem; }
         .modal-header h3 { font-size: 1.8rem; font-weight: 700; color: #0f2b3b; }
         .close-circle { background: #f1f5f9; border: none; border-radius: 50%; width: 36px; height: 36px; display: flex; align-items: center; justify-content: center; cursor: pointer; }
@@ -276,7 +225,7 @@
                             <td>{{ \Carbon\Carbon::parse($period->end_date)->format('F j, Y') }}</td>
                             <td>
                                 <span class="status-badge {{ $period->status }}">
-                                    {{ str_replace('_',' ', $period->status) }}
+                                    {{ ucwords(str_replace('_', ' ', $period->status)) }}
                                 </span>
                             </td>
                             <td>
@@ -293,7 +242,7 @@
         </div>
     </div>
 
-    <!-- Placeholder Tabs -->
+    <!-- Salary Tabs -->
     <div id="salaryTab" class="tab-content">
         <div class="table-section" style="padding: 1.5rem 0 1.5rem 0; text-align: center;">
             <!-- HEADER -->
@@ -336,13 +285,169 @@
                 </table>
             </div>
         </div>
-    </div>
-    <div id="benefitsTab" class="tab-content">
-        <div class="table-section" style="padding: 1.5rem; text-align: center;">
-            <h3>Benefits</h3>
-            <p>Content will appear here.</p>
+
+        <!-- PAYROLL ITEMS SECTION -->
+        <div class="table-section" style="margin-top: 2rem; text-align:left;">
+            
+            <div class="row-controls">
+                <h3 style="font-size:1.3rem; font-weight:600;">Payroll Items</h3>
+                <div class="col-button">
+                    <button class="btn btn-add" onclick="openPayrollItemModal()">
+                        <i class="fa fa-plus-circle"></i> Add Payroll Item
+                    </button>
+                </div>
+            </div>
+
+            <div class="table-responsive">
+                <table>
+                    <thead>
+                        <tr>
+                            <th>Name</th>
+                            <th>Type</th>
+                            <th>Basis</th>
+                            <th>Multiplier</th>
+                            <th>Status</th>
+                            <th>Action</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        @foreach(DB::table('payroll_items')->get() as $item)
+                        <tr>
+                            <td>{{ $item->name }}</td>
+                            <td>{{ ucwords(str_replace('_', ' ', $item->type)) }}</td>
+                            <td>{{ ucwords(str_replace('_', ' ', $item->basis)) }}</td>
+                            <td>{{ $item->multiplier }}</td>
+                            <td>{{ ucwords($item->status) }}</td>
+                            <td>
+                                <button class="btn btn-edit"
+                                    data-id="{{ $item->id }}"
+                                    data-name="{{ $item->name }}"
+                                    data-type="{{ $item->type }}"
+                                    data-basis="{{ $item->basis }}"
+                                    data-multiplier="{{ $item->multiplier }}"
+                                    data-status="{{ $item->status }}"
+                                    onclick="editPayrollItem(this)">
+                                    Edit
+                                </button>
+
+                                <form method="POST" action="/payroll-item/delete/{{ $item->id }}" style="display:inline;">
+                                    @csrf @method('DELETE')
+                                    <button class="btn btn-status">Delete</button>
+                                </form>
+                            </td>
+                        </tr>
+                        @endforeach
+                    </tbody>
+                </table>
+            </div>
         </div>
     </div>
+    <!-- Benefits tab -->
+    <div id="benefitsTab" class="tab-content">
+
+    <div class="table-section" style="padding: 1.5rem 0;">
+
+        <!-- HEADER -->
+        <div class="row-controls">
+
+            <div class="col-search">
+                <div class="search-box">
+                    <input type="text" id="benefitSearch" placeholder="Search benefits...">
+                    <i class="fa fa-search"></i>
+                </div>
+            </div>
+
+            <div class="col-filter">
+                <div class="select-wrapper">
+                    <select id="typeFilter">
+                        <option value="">All Types</option>
+                        <option value="allowance">Allowance</option>
+                        <option value="bonus">Bonus</option>
+                    </select>
+                    <i class="fas fa-chevron-down dropdown-icon"></i>
+                </div>
+            </div>
+
+            <div class="col-button">
+                <button class="btn btn-add" onclick="openBenefitModal()">
+                    <i class="fa fa-plus-circle"></i> Add Benefit
+                </button>
+            </div>
+
+        </div>
+
+        <!-- TABLE -->
+        <div class="table-responsive">
+            <table id="benefitsTable">
+                <thead>
+                    <tr>
+                        <th>Benefit Name</th>
+                        <th>Type</th>
+                        <th>Amount</th>
+                        <th>Frequency</th>
+                        <th>Taxable</th>
+                        <th>Eligibility</th>
+                        <th>Status</th>
+                        <th width="200">Action</th>
+                    </tr>
+                </thead>
+
+                <tbody>
+                    @foreach($benefits as $benefit)
+                    <tr>
+                        <td>{{ $benefit->name }}</td>
+                        <td>{{ ucfirst($benefit->type) }}</td>
+                        <td>₱{{ number_format($benefit->amount,2) }}</td>
+                        <td>{{ ucwords(str_replace('_', ' ', $benefit->frequency)) }}</td>
+                        <td>
+                            <span class="status-badge {{ $benefit->tax == 'Taxable' ? 'pending' : 'completed' }}">
+                                {{ $benefit->tax }}
+                            </span>
+                        </td>
+                        <td>
+                            @php
+                                $eligibility_display = str_replace('_', ' ', $benefit->eligibility);
+                                if ($eligibility_display == 'salary grades') $eligibility_display = 'Salary Grades';
+                                if ($eligibility_display == 'departments') $eligibility_display = 'Departments';
+                                echo ucwords($eligibility_display);
+                            @endphp
+                        </td>
+                        <td>
+                            <span class="status-badge {{ $benefit->status == 'active' ? 'completed' : 'pending' }}">
+                                {{ ucfirst($benefit->status) }}
+                            </span>
+                        </td>
+                        <td>
+                            <button class="btn btn-edit"
+                                data-id="{{ $benefit->id }}"
+                                data-benefit_item="{{ $benefit->name }}"
+                                data-type="{{ $benefit->type }}"
+                                data-amount="{{ $benefit->amount }}"
+                                data-frequency="{{ $benefit->frequency }}"
+                                data-tax="{{ $benefit->tax }}"
+                                data-eligibility="{{ $benefit->eligibility }}"
+                                data-departments='@json($benefit->eligible_departments)'
+                                data-grades='@json($benefit->eligible_salary_grades)'
+                                data-status="{{ $benefit->status }}"
+                                onclick="handleEditBenefit(this)">
+                                Edit
+                            </button>
+
+                            <form method="POST" action="/benefits/delete/{{ $benefit->id }}" style="display:inline;">
+                                @csrf
+                                @method('DELETE')
+                                <button class="btn btn-status">Delete</button>
+                            </form>
+                        </td>
+                    </tr>
+                    @endforeach
+                </tbody>
+
+            </table>
+        </div>
+
+    </div>
+</div>
     <div id="contributionsTab" class="tab-content">
         <div class="analytics" style="margin-bottom:25px;">
         @php
@@ -664,6 +769,125 @@
         </form>
     </div>
 </div>
+
+<!-- PAYROLL ITEM MODAL -->
+<div id="payrollItemModal" class="modal">
+    <div class="modal-content">
+        
+        <div class="modal-header">
+            <h3 id="payrollItemTitle">Add Payroll Item</h3>
+            <button class="close-circle" onclick="closePayrollItemModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="/payroll-item/store" id="payrollItemForm">
+            @csrf
+
+            <input type="hidden" name="id" id="pi_id">
+
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" id="pi_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type" id="pi_type">
+                    <option value="Addition">Addition</option>
+                    <option value="Deduction">Deduction</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Basis</label>
+                <select name="basis" id="pi_basis">
+                    <option value="per_minute">Per Minute</option>
+                    <option value="per_hour">Per Hour</option>
+                    <option value="per_day">Per Day</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Multiplier</label>
+                <input type="number" step="0.01" name="multiplier" id="pi_multiplier" required>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="pi_status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-outline-modal" onclick="closePayrollItemModal()">Cancel</button>
+                <button type="submit" class="btn-primary-modal">Save</button>
+            </div>
+
+        </form>
+    </div>
+</div>
+
+<!-- PAYROLL ITEMS MODAL -->
+<div id="payrollItemModal" class="modal">
+    <div class="modal-content">
+        
+        <div class="modal-header">
+            <h3 id="payrollItemTitle">Payroll Item</h3>
+            <button class="close-circle" onclick="closePayrollItemModal()" aria-label="Close">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form method="POST" action="/payroll-items/store" id="payrollItemForm">
+            @csrf
+            <input type="hidden" name="id" id="pi_id">
+
+            <div class="form-group">
+                <label>Name</label>
+                <input type="text" name="name" id="pi_name" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type" id="pi_type">
+                    <option value="Addition">Addition</option>
+                    <option value="Deduction">Deduction</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Basis</label>
+                <select name="basis" id="pi_basis">
+                    <option value="per_minute">Per Minute</option>
+                    <option value="per_hour">Per Hour</option>
+                    <option value="per_day">Per Day</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Multiplier</label>
+                <input type="number" step="0.01" name="multiplier" id="pi_multiplier" required>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="pi_status">
+                    <option value="Active">Active</option>
+                    <option value="Inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-outline-modal" onclick="closePayrollItemModal()">Cancel</button>
+                <button type="submit" class="btn-primary-modal">Save</button>
+            </div>
+
+        </form>
+    </div>
+</div>
 <!-- CONTRIBUTIONS MODAL -->
  <!-- PAGIBIG MODAL -->
 <div id="pagibigModal" class="modal">
@@ -867,6 +1091,105 @@
                     <button type="submit" class="btn-primary-modal">Save</button>
                 </div>
             </div>
+        </form>
+    </div>
+</div>
+<!-- BENEFITS -->
+ <div id="benefitModal" class="modal">
+    <div class="modal-content">
+
+        <div class="modal-header">
+            <h3 id="benefitModalTitle">Add Benefit</h3>
+            <button class="close-circle" onclick="closeBenefitModal()">
+                <i class="fas fa-times"></i>
+            </button>
+        </div>
+
+        <form id="benefitForm" method="POST" action="/benefits/store">
+            @csrf
+
+            <input type="hidden" name="id" id="benefit_id">
+
+            <div class="form-group">
+                <label>Benefit Name</label>
+                <input type="text" name="name" id="benefit_item" required>
+            </div>
+
+            <div class="form-group">
+                <label>Type</label>
+                <select name="type" id="type">
+                    <option value="Allowance">Allowance</option>
+                    <option value="Bonus">Bonus</option>
+                    <option value="Incentive">Incentive</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Amount</label>
+                <input type="number" step="0.01" name="amount" id="amount" required>
+            </div>
+
+            <div class="form-group">
+                <label>Frequency</label>
+                <select name="frequency" id="frequency">
+                    <option value="per_cutoff">Per Cutoff</option>
+                    <option value="monthly">Monthly</option>
+                    <option value="quarterly">Quarterly</option>
+                    <option value="yearly">Yearly</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Taxable</label>
+                <select id="taxable" name="tax">
+                    <option value="Taxable">Taxable</option>
+                    <option value="Non-taxable">Non-taxable</option>
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Eligibility</label>
+                <select name="eligibility" id="eligibility" onchange="toggleEligibility()">
+                    <option value="all">All Employees</option>
+                    <option value="departments">Selected Departments</option>
+                    <option value="salary_grades">Selected Salary Grades</option>
+                </select>
+            </div>
+            <!-- DEPARTMENTS -->
+            <div class="form-group" id="deptSelect" style="display:none;">
+                <label>Select Departments</label>
+                <select name="eligible_departments[]" multiple>
+                    @foreach($departments as $dept)
+                        <option value="{{ $dept->id }}">{{ $dept->name }}</option>
+                    @endforeach
+                </select>
+            </div>
+
+            <!-- SALARY GRADES -->
+            <div class="form-group" id="gradeSelect" style="display:none;">
+                <label>Select Salary Grades</label>
+                <select name="eligible_salary_grades[]" multiple>
+                    @foreach($salaryGrades as $grade)
+                        <option value="{{ $grade->id }}">
+                            {{ $grade->level_name }}
+                        </option>
+                    @endforeach
+                </select>
+            </div>
+
+            <div class="form-group">
+                <label>Status</label>
+                <select name="status" id="status">
+                    <option value="active">Active</option>
+                    <option value="inactive">Inactive</option>
+                </select>
+            </div>
+
+            <div class="form-actions">
+                <button type="button" class="btn-outline-modal" onclick="closeBenefitModal()">Cancel</button>
+                <button type="submit" class="btn-primary-modal">Save</button>
+            </div>
+
         </form>
     </div>
 </div>
@@ -1355,6 +1678,152 @@ window.addEventListener('click', function (event) {
     if (event.target === modal) {
         modal.style.display = 'none';
     }
+});
+</script>
+<script>
+document.addEventListener("DOMContentLoaded", function () {
+
+    const table = document.getElementById("benefitsTable");
+    const tbody = table.querySelector("tbody");
+    const rows = Array.from(tbody.querySelectorAll("tr"));
+
+    const searchInput = document.getElementById("benefitSearch");
+    const typeFilter = document.getElementById("typeFilter");
+
+    function filterTable() {
+        const searchValue = searchInput.value.toLowerCase();
+        const typeValue = typeFilter.value.toLowerCase();
+
+        rows.forEach(row => {
+            const text = row.textContent.toLowerCase();
+
+            const typeCell = row.children[1].textContent.toLowerCase(); // TYPE COLUMN
+
+            const matchesSearch = text.includes(searchValue);
+            const matchesType = typeValue === "" || typeCell.includes(typeValue);
+
+            if (matchesSearch && matchesType) {
+                row.style.display = "";
+            } else {
+                row.style.display = "none";
+            }
+        });
+    }
+
+    searchInput.addEventListener("input", filterTable);
+    typeFilter.addEventListener("change", filterTable);
+
+});
+</script>
+<script>
+function openBenefitModal() {
+    document.getElementById('benefitModal').style.display = 'flex';
+    document.getElementById('benefitForm').reset();
+    document.getElementById('benefit_id').value = '';
+    document.getElementById('benefitModalTitle').innerText = 'Add Benefit';
+}
+
+function closeBenefitModal() {
+    document.getElementById('benefitModal').style.display = 'none';
+}
+
+function editBenefit(data) {
+    openBenefitModal();
+
+    document.getElementById('benefitModalTitle').innerText = 'Edit Benefit';
+
+    document.getElementById('benefit_id').value = data.id;
+    document.getElementById('benefit_item').value = data.name;
+    document.getElementById('type').value = data.type;
+    document.getElementById('amount').value = data.amount;
+    document.getElementById('frequency').value = data.frequency;
+
+    // FIX TAX (string, not boolean)
+    document.getElementById('taxable').value =
+    data.tax === 'Taxable' ? 'Taxable' : 'Non-taxable';
+
+    document.getElementById('eligibility').value = data.eligibility;
+    document.getElementById('status').value = data.status;
+}
+
+    window.addEventListener('click', function(e){
+    const modal = document.getElementById('benefitModal');
+    if(e.target === modal) modal.style.display = 'none';
+});
+
+function handleEditBenefit(button) {
+    openBenefitModal();
+
+    document.getElementById('benefit_id').value = button.dataset.id;
+    document.getElementById('benefit_item').value = button.dataset.benefit_item;
+    document.getElementById('type').value = button.dataset.type;
+    document.getElementById('amount').value = button.dataset.amount;
+    document.getElementById('frequency').value = button.dataset.frequency;
+    document.getElementById('taxable').value = button.dataset.tax;
+    document.getElementById('eligibility').value = button.dataset.eligibility;
+    document.getElementById('status').value = button.dataset.status;
+
+    toggleEligibility();
+
+    let dept = JSON.parse(button.dataset.departments || "[]");
+    let grades = JSON.parse(button.dataset.grades || "[]");
+
+    document.querySelectorAll('[name="eligible_departments[]"]').forEach(opt => {
+        opt.selected = dept.includes(parseInt(opt.value));
+    });
+
+    document.querySelectorAll('[name="eligible_salary_grades[]"]').forEach(opt => {
+        opt.selected = grades.includes(parseInt(opt.value));
+    });
+}
+
+function toggleEligibility() {
+    let type = document.getElementById('eligibility').value;
+
+    document.getElementById('deptSelect').style.display = 'none';
+    document.getElementById('gradeSelect').style.display = 'none';
+
+    if (type === 'departments') {
+        document.getElementById('deptSelect').style.display = 'block';
+    }
+
+    if (type === 'salary_grades') {
+        document.getElementById('gradeSelect').style.display = 'block';
+    }
+
+
+}
+</script>
+<script>
+function openPayrollItemModal() {
+    document.getElementById('payrollItemModal').style.display = 'flex';
+
+    document.getElementById('payrollItemForm').reset();
+    document.getElementById('pi_id').value = '';
+    document.getElementById('payrollItemTitle').innerText = "Add Payroll Item";
+}
+
+
+function editPayrollItem(btn) {
+    document.getElementById('payrollItemModal').style.display = 'flex';
+
+    document.getElementById('payrollItemTitle').innerText = 'Edit Payroll Item';
+
+    document.getElementById('pi_id').value = btn.dataset.id;
+    document.getElementById('pi_name').value = btn.dataset.name;
+    document.getElementById('pi_type').value = btn.dataset.type;
+    document.getElementById('pi_basis').value = btn.dataset.basis;
+    document.getElementById('pi_multiplier').value = btn.dataset.multiplier;
+    document.getElementById('pi_status').value = btn.dataset.status;
+}
+
+function closePayrollItemModal() {
+    document.getElementById('payrollItemModal').style.display = 'none';
+}
+
+window.addEventListener('click', function(e){
+    const modal = document.getElementById('payrollItemModal');
+    if(e.target === modal) modal.style.display = 'none';
 });
 </script>
 </body>
