@@ -34,8 +34,12 @@ Route::get('/payroll-period/{id}/view', [PayrollPeriodController::class, 'viewPa
 Route::get('/payroll/employee/{id}', [PayrollPeriodController::class, 'getEmployeePayroll']);
 Route::post('/payroll/employee/{id}/status', [PayrollPeriodController::class, 'updateEmployeeStatus']);
 Route::post('/payroll/period/{id}/submit', [PayrollPeriodController::class, 'submitForApproval']);
+Route::post('/payroll/employee/{id}/unsubmit', [PayrollPeriodController::class, 'unsubmitEmployeeStatus']);
+Route::get('/payroll/period/{id}/progress', [PayrollPeriodController::class, 'getProgress']);
 Route::get('/payroll/payslip/{id}/export', [PayrollPeriodController::class, 'exportPayslip']);
 Route::post('/payroll/employee/{id}/edit', [PayrollPeriodController::class, 'editEmployeePayslip']);
+Route::post('/payroll/employee/{id}/adjustments', [PayrollPeriodController::class, 'updateAdjustments']);
+Route::get('/payroll/employee/{id}/export', [PayrollPeriodController::class, 'export']);
 
 // SALARY STRUCTURE
 Route::post('/salary-grade/store', [PayrollPeriodController::class, 'storeSalaryGrade']);

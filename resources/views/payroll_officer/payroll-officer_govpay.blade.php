@@ -117,8 +117,8 @@
                             <td>₱{{ number_format($row->pagibig_total, 2) }}</td>
                             <td>₱{{ number_format($row->tax_total, 2) }}</td>
                             <td>
-                                <span class="status-badge status-{{ $row->status === 'submitted' ? 'submitted' : 'pending' }}">
-                                    {{ $row->status === 'submitted' ? 'Submitted' : 'Pending' }}
+                                <span class="status-badge status-{{ strtolower($row->status) === 'submitted' ? 'submitted' : 'pending' }}">
+                                    {{ ucfirst($row->status) }}
                                 </span>
                             </td>
                             <td>
@@ -155,8 +155,8 @@
                             <td>₱{{ number_format($row->pagibig_total, 2) }}</td>
                             <td>₱{{ number_format($row->tax_total, 2) }}</td>
                             <td>
-                                <span class="status-badge status-{{ $row->status === 'submitted' ? 'submitted' : 'pending' }}">
-                                    {{ $row->status === 'submitted' ? 'Submitted' : 'Pending' }}
+                                <span class="status-badge status-{{ strtolower($row->status) === 'submitted' ? 'submitted' : 'pending' }}">
+                                    {{ ucfirst(strtolower($row->status)) }}
                                 </span>
                             </td>
                         </tr>
@@ -225,8 +225,8 @@
                             <td>₱{{ number_format($row->pagibig, 2) }}</td>
                             <td>₱{{ number_format($row->tax, 2) }}</td>
                             <td>
-                                <span class="status-badge status-{{ $row->status === 'submitted' ? 'submitted' : 'pending' }}">
-                                    {{ ucfirst($row->status) }}
+                                <span class="status-badge status-{{ strtolower($row->status) === 'submitted' ? 'submitted' : 'pending' }}">
+                                    {{ ucfirst(strtolower($row->status)) }}
                                 </span>
                             </td>
                         </tr>

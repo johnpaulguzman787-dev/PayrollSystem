@@ -149,8 +149,8 @@ th{
     <p><strong>Employee:</strong> {{ $record->fname }} {{ $record->lname }}</p>
     <p><strong>Department:</strong> {{ $record->department_name }}</p>
 
-    <p><strong>Job Title:</strong> {{ $record->job_title_name }}</p>
-    <p><strong>Date Hired:</strong> {{ \Carbon\Carbon::parse($record->date_hired)->format('F d, Y') }}</p>
+    <p><strong>Job Title:</strong> {{ $record->job_title }}</p>
+    <p><strong>Date Hired:</strong> {{ $record->date_hired ? \Carbon\Carbon::parse($record->date_hired)->format('F d, Y') : 'N/A' }}</p>
 
     <p><strong>Payroll Period:</strong> {{ $record->period_name }}</p>
     <p><strong>Period Date:</strong> {{ $record->start_date }} - {{ $record->end_date }}</p>
@@ -193,7 +193,11 @@ th{
 <!-- SUMMARY -->
 <div class="summary">
     <p><strong>Gross Pay:</strong> {{ number_format($record->gross_pay,2) }}</p>
-    <p><strong>Total Earnings:</strong> {{ number_format($record->total_earnings,2) }}</p>
+        <p><strong>Total Earnings:</strong> 
+        {{ number_format(
+            $record->gross_pay + $record->benefits_total + $record->other_benefits, 
+        2) }}
+    </p>
     <p><strong>Total Deductions:</strong> {{ number_format($record->total_deductions,2) }}</p>
 
     <div class="net-pay">

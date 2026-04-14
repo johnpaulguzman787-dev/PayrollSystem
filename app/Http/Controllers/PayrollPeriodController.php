@@ -13,7 +13,7 @@ class PayrollPeriodController extends Controller
         $periods = DB::table('payroll_periods')->orderByDesc('id')->get();
         $currentPeriod = DB::table('payroll_periods')
             ->where('status', 'pending')
-            ->orderByRaw("CASE WHEN status = 'for_approval' THEN 1 WHEN status = 'open' THEN 2 END")
+            ->orderByRaw("CASE WHEN status = 'submitted' THEN 1 WHEN status = 'open' THEN 2 END")
             ->orderByDesc('id')
             ->first();
 
@@ -112,7 +112,7 @@ class PayrollPeriodController extends Controller
             'start_date' => 'required|date',
             'end_date' => 'required|date|after_or_equal:start_date',
             'payout_date' => 'required|date|after_or_equal:end_date',
-            'status' => 'required|in:draft,open,for_approval,approved,closed'
+            'status' => 'required|in:draft,open,submitted,approved,closed'
         ]);
 
         $overlap = DB::table('payroll_periods')
@@ -372,6 +372,8 @@ $netPay = $grossPay
             'pagibig' => $monthlyPagibig,
             'withholding_tax' => $monthlyTax,
             'total_deductions' => $totalDeductions,
+            'other_benefits' => 0,
+            'other_deductions' => 0,
             'net_pay' => $netPay,
             'status' => 'Pending',
             'created_at' => now(),
@@ -416,7 +418,7 @@ $netPay = $grossPay
     // Counts
     $totalCount = $records->count();
     $submittedCount = $records->where('status', 'Submitted')->count();
-    $approvalCount = in_array($period->status, ['for_approval', 'approved', 'completed']) ? 1 : 0;
+    $approvalCount = in_array($period->status, ['submitted', 'approved', 'completed']) ? 1 : 0;
     $financeCount = in_array($period->status, ['approved', 'completed']) ? 1 : 0;
     $disbursementCount = $period->status == 'completed' ? 1 : 0;
 
@@ -424,21 +426,6 @@ $netPay = $grossPay
         'period', 'records', 'gross', 'deductions', 'net',
         'totalCount', 'submittedCount', 'approvalCount', 'financeCount', 'disbursementCount'
     ));
-}
-
-public function exportPayslip($id)
-{
-    $record = DB::table('payslips')
-        ->join('employees', 'payslips.employee_id', '=', 'employees.employee_id')
-        ->where('payslips.id', $id)
-        ->select('payslips.*', 'employees.fname', 'employees.lname')
-        ->first();
-
-    if (!$record) {
-        abort(404);
-    }
-
-    return view('export_payslip', compact('record'));
 }
 
     public function getEmployeePayroll($id)
@@ -516,7 +503,7 @@ return response()->json([
     {
         $record = DB::table('payslips')->where('id', $id)->first();
         if ($record->status === 'Pending') {
-            $newStatus = 'submitted';
+            $newStatus = 'Submitted';
         } else {
             return response()->json(['error' => 'Already submitted and locked']);
         }
@@ -531,7 +518,7 @@ return response()->json([
         $period = DB::table('payroll_periods')->where('id', $id)->first();
         if (!$period) return response()->json(['error' => 'Not found']);
 
-        DB::table('payroll_periods')->where('id', $id)->update(['status' => 'for_approval']);
+        DB::table('payroll_periods')->where('id', $id)->update(['status' => 'submitted']);
 
         return response()->json(['success' => true]);
     }
@@ -754,4 +741,94 @@ public function deletePayrollItem($id)
     return back()->with('success', 'Deleted!');
 }
 
+public function unsubmitEmployeeStatus($id)
+{
+    $record = DB::table('payslips')->where('id', $id)->first();
+
+    if ($record->status === 'Submitted') {
+        DB::table('payslips')->where('id', $id)->update([
+            'status' => 'Pending'
+        ]);
+
+        return response()->json(['success' => true]);
+    }
+
+    return response()->json(['error' => 'Only submitted records can be unsubmitted']);
+}
+
+public function getProgress($id)
+{
+    $records = DB::table('payslips')
+        ->where('payroll_period_id', $id)
+        ->get();
+
+    $period = DB::table('payroll_periods')->where('id', $id)->first();
+
+    return response()->json([
+        'total' => $records->count(),
+        'submitted' => $records->where('status', 'Submitted')->count(),
+        'approval' => in_array($period->status, ['submitted','approved','completed']) ? 1 : 0,
+        'finance' => in_array($period->status, ['approved','completed']) ? 1 : 0,
+        'disbursement' => $period->status == 'completed' ? 1 : 0,
+    ]);
+}
+
+public function updateAdjustments(Request $request, $id)
+{
+    DB::table('payslips')->where('id', $id)->update([
+        'other_benefits' => $request->other_benefits ?? 0,
+        'other_deductions' => $request->other_deductions ?? 0,
+        'net_pay' => DB::raw("
+            gross_pay 
+            + {$request->other_benefits}
+            - total_deductions 
+            - {$request->other_deductions}
+        ")
+    ]);
+
+    return response()->json(['success' => true]);
+}
+
+
+
+public function export($id)
+{
+    $record = DB::table('payslips')
+        ->join('employees', 'payslips.employee_id', '=', 'employees.employee_id')
+        ->leftJoin('departments', 'employees.department_id', '=', 'departments.id')
+        ->leftJoin('job_titles', 'employees.job_title_id', '=', 'job_titles.id')
+        ->leftJoin('payroll_periods', 'payslips.payroll_period_id', '=', 'payroll_periods.id') // ✅ ADD THIS
+        ->where('payslips.id', $id)
+        ->select(
+            'payslips.*',
+            'employees.fname',
+            'employees.lname',
+            'employees.date_hired',
+            'departments.name as department_name',
+            'job_titles.title as job_title',
+            'payroll_periods.name as period_name',
+            'payroll_periods.start_date',
+            'payroll_periods.end_date',
+
+            DB::raw('(payslips.gross_pay + payslips.benefits_total + payslips.other_benefits) as total_earnings')
+        )
+        ->first();
+
+    if (!$record) {
+        abort(404, 'Payslip not found');
+    }
+
+    // Separate earnings & deductions (your blade expects this)
+    $earnings = DB::table('payroll_items')
+        ->where('payroll_record_id', $id)
+        ->where('type', 'Addition')
+        ->get();
+
+    $deductions = DB::table('payroll_items')
+        ->where('payroll_record_id', $id)
+        ->where('type', 'Deduction')
+        ->get();
+
+    return view('partials.payslip_print', compact('record', 'earnings', 'deductions'));
+}
 }

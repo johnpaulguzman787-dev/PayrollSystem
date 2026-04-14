@@ -33,7 +33,7 @@ class LoginController extends Controller
                 'employee_id' => $user->employee_id // important!
             ]);
 
-            return redirect('/employees')->with('success','Login successful!');
+            return redirect('/payroll-period')->with('success','Login successful!');
         }
 
         return back()->with('error','Invalid email or password');
